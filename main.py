@@ -74,12 +74,21 @@ if __name__ == "__main__":
     # Filter filenames to include only .txt files
     txt_filenames = [filename for filename in filenames if filename.endswith('.txt')]
 
+    # Ensure the 'build' directory exists
+    build_dir = 'build'
+    os.makedirs(build_dir, exist_ok=True)
+
+    # Clean the txt files
     for txt_filename in txt_filenames:
         input_path = os.path.join(input_folder, txt_filename)
         output_path = os.path.join('build', os.path.splitext(txt_filename)[0] + '_output.json')
         convert_transcript_to_json(input_path, output_path)
 
+    # Filter for common media formats using FFmpeg
+    media_formats = ['.mp3', '.wav', '.mp4', '.flac'] # Add more formats as needed
+    audio_filenames = [filename for filename in filenames if any(filename.endswith(format) for format in media_formats)]
+
     # Handle all of the input files
-    for filename in filenames:
+    for audio_filename in audio_filenames:
         # Use os.path.join to create the full path for each file
-        path = os.path.join(input_folder, filename)
+        path = os.path.join(input_folder, audio_filename)
