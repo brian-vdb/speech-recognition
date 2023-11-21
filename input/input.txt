@@ -1,0 +1,8 @@
+task1.wav: 	A computer is like air conditioning, it becomes useless when you open Windows.
+
+task2_a.wav: 	C makes it easy to shoot yourself in the foot; C++ makes it harder,
+                but when you do, it blows your whole leg off. Tbjasdh asdghgdhw ehfeghefeherhehfuhef efhuheufhehbffebged euhuhef
+
+task2_b.wav: 	If debugging is the process of removing software bugs, then programming must be the process of putting them in.
+
+task2_c.wav: 	Measuring programming progess by the lines of code is like measuring aircraft building progress by weight
