@@ -2,7 +2,6 @@ import os
 import sys
 from dotenv import load_dotenv
 from rev_ai import apiclient, JobStatus
-from time import sleep
 
 # Get the API key
 load_dotenv()
