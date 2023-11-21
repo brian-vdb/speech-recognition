@@ -66,6 +66,12 @@ def process_audio_file(path: str) -> any:
     # return the job id
     return job.id
 
+def convert_job_to_json(filename: str, job_id: any) -> dict[str, str]:
+    json = client.get_transcript_json(job_id)
+    
+    # Return a dictionary for the current dialogue
+    return {"filename": filename, "text": "PLACEHOLDER"}
+
 if __name__ == "__main__":
     # Define the input folder from args when available
     input_folder = sys.argv[1] if len(sys.argv) >= 2 else 'input'
@@ -85,10 +91,12 @@ if __name__ == "__main__":
         convert_transcript_to_json(input_path, output_path)
 
     # Filter for common media formats using FFmpeg
-    media_formats = ['.mp3', '.wav', '.mp4', '.flac'] # Add more formats as needed
+    media_formats = ['.mp1', '.mp2', '.mp3', '.wav', '.mp4', '.flac', '.rso', '.ape'] # Add more formats as needed
     audio_filenames = [filename for filename in filenames if any(filename.endswith(format) for format in media_formats)]
 
     # Handle all of the input files
     for audio_filename in audio_filenames:
         # Use os.path.join to create the full path for each file
         path = os.path.join(input_folder, audio_filename)
+
+        process_audio_file(path)
