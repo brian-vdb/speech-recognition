@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from rev_ai import apiclient, JobStatus
+import json
 
 # Get the API key
 load_dotenv()
@@ -10,8 +11,7 @@ api_key = os.environ.get("API_KEY")
 # create your client
 client = apiclient.RevAiAPIClient(api_key)
 
-import json
-
+# Function to convert the transcript file to JSON
 def convert_transcript_to_json(input_path: str, output_path: str) -> None:
     data = []
 
@@ -66,7 +66,8 @@ def process_audio_file(path: str) -> any:
     # return the job id
     return job.id
 
-def convert_job_to_json(filename: str, job_id: any) -> dict[str, str]:
+# Function to 
+def get_json_from_job(filename: str, job_id: any) -> dict[str, str]:
     json = client.get_transcript_json(job_id)
     
     # Return a dictionary for the current dialogue
@@ -98,5 +99,3 @@ if __name__ == "__main__":
     for audio_filename in audio_filenames:
         # Use os.path.join to create the full path for each file
         path = os.path.join(input_folder, audio_filename)
-
-        process_audio_file(path)
