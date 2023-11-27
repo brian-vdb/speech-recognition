@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # Clean the txt files
     for txt_filename in txt_filenames:
         input_path = os.path.join(input_folder, txt_filename)
-        output_path = os.path.join('build', os.path.splitext(txt_filename)[0] + '_output.json')
+        output_path = os.path.join('build', 'transcript_output.json')
         convert_transcript_to_json(input_path, output_path)
     
     # Filter for common media formats using FFmpeg
@@ -137,6 +137,7 @@ if __name__ == "__main__":
         print(f'Start: [Processing {audio_filename} Dialogue]')
         dialogue = process_job(audio_filename, job_id)
         print(f'Successfully: [Processing {audio_filename} Dialogue]')
+        print(dialogue)
 
         # Append the dialogue to the data array
         data.append(dialogue)
