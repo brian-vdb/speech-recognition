@@ -106,7 +106,7 @@ if __name__ == "__main__":
         convert_transcript_to_json(input_path, output_path)
 
     # Filter for common media formats using FFmpeg
-    media_formats = ['.mp1', '.mp2', '.mp3', '.wav', '.mp4', '.flac', '.rso', '.ape'] # Add more formats as needed
+    media_formats = ['.m4a', '.mp1', '.mp2', '.mp3', '.wav', '.mp4', '.flac', '.rso', '.ape'] # Add more formats as needed
     audio_filenames = [filename for filename in filenames if any(filename.endswith(format) for format in media_formats)]
 
     # Handle all of the input files
