@@ -27,30 +27,33 @@ def convert_transcript_to_json(input_path: str, output_path: str) -> None:
         input_text = input_file.read()
 
     # Split the input text into lines
-    lines = input_text.strip().split('\n')
+    lines = input_text.split('\n')
 
     # Process each line and create the JSON structure
     stringBuilder = ""
     data = []
     for line in lines:
-        if(line == ""):
-            # Appends lines in a dialogue
-            cleaned_string = ' '.join(stringBuilder.split())
+        if(line == "" and stringBuilder != ""):
+            try:
+                # Appends lines in a dialogue
+                cleaned_string = ' '.join(stringBuilder.split())
 
-            # Split the cleaned string into filename and text
-            filename, text = cleaned_string.split(':', 1)
+                # Split the cleaned string into filename and text
+                filename, text = cleaned_string.split(':', 1)
 
-            # Remove trailing spaces from text
-            text = text.strip()
+                # Remove trailing spaces from text
+                text = text.strip()
 
-            # Create a dictionary for the current dialogue
-            dialogue = {"filename": filename, "text": text}
+                # Create a dictionary for the current dialogue
+                dialogue = {"filename": filename, "text": text}
 
-            # Add the dialogue dictionary to the data list
-            data.append(dialogue)
+                # Add the dialogue dictionary to the data list
+                data.append(dialogue)
 
-            # Reset the string builder
-            stringBuilder = ""
+                # Reset the string builder
+                stringBuilder = ""
+            except:
+                print("Error: Unable save dialogue")
         else:
             stringBuilder += line + '\n'
 
@@ -104,7 +107,7 @@ if __name__ == "__main__":
         input_path = os.path.join(input_folder, txt_filename)
         output_path = os.path.join('build', os.path.splitext(txt_filename)[0] + '_output.json')
         convert_transcript_to_json(input_path, output_path)
-
+    
     # Filter for common media formats using FFmpeg
     media_formats = ['.m4a', '.mp1', '.mp2', '.mp3', '.wav', '.mp4', '.flac', '.rso', '.ape'] # Add more formats as needed
     audio_filenames = [filename for filename in filenames if any(filename.endswith(format) for format in media_formats)]
