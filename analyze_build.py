@@ -18,67 +18,73 @@ def preprocess_text(text: str) -> list[str]:
     text_lowercase =  text_without_punctuation.lower()
     return text_lowercase.split()
 
-# Calculates the word error rate by comparing two strings
-def calculate_wer(ref_words, hyp_words):
+# Calculates the levenshtein distance matrix
+def levenshtein_distance(ref_words: list[str], hyp_words: list[str]) -> np.ndarray[float, float]:
     # Initialize a matrix with size |ref_words|+1 x |hyp_words|+1
     # The extra row and column are for the case when one of the strings is empty
-    d = np.zeros((len(ref_words) + 1, len(hyp_words) + 1))
+    ld = np.zeros((len(ref_words) + 1, len(hyp_words) + 1))
 
-    # The number of operations for an empty hypothesis to become the reference
-    # is just the number of words in the reference (i.e., deleting all words)
-    for i in range(len(ref_words) + 1):
-        d[i, 0] = i
-
-    # The number of operations for an empty reference to become the hypothesis
-    # is just the number of words in the hypothesis (i.e., inserting all words)
-    for j in range(len(hyp_words) + 1):
-        d[0, j] = j
+    # Base cases: number of operations for an empty hypothesis/reference
+    ld[:, 0] = np.arange(len(ref_words) + 1)
+    ld[0, :] = np.arange(len(hyp_words) + 1)
 
     # Iterate over the words in the reference and hypothesis
     for i in range(1, len(ref_words) + 1):
         for j in range(1, len(hyp_words) + 1):
             # If the current words are the same, no operation is needed
-            # So we just take the previous minimum number of operations
             if ref_words[i - 1] == hyp_words[j - 1]:
-                d[i, j] = d[i - 1, j - 1]
+                ld[i, j] = ld[i - 1, j - 1]
             else:
-                # If the words are different, we consider three operations:
-                # substitution, insertion, and deletion
-                # And we take the minimum of these three possibilities
-                substitution = d[i - 1, j - 1] + 1
-                insertion = d[i, j - 1] + 1
-                deletion = d[i - 1, j] + 1
-                d[i, j] = min(substitution, insertion, deletion)
+                # If the words are different, consider three operations:
+                # substitution, insertion, and deletion, take the minimum
+                ld[i, j] = min(ld[i - 1, j - 1] + 1, ld[i, j - 1] + 1, ld[i - 1, j] + 1)
 
-    # The minimum number of operations to transform the hypothesis into the reference
-    # is in the bottom-right cell of the matrix
-    # We divide this by the number of words in the reference to get the WER
-    wer = d[len(ref_words), len(hyp_words)] / len(ref_words)
-    return wer
+    return ld
+
+# Function to find correct allignments using the levenshtein distance matrix
+def find_aligning_values(ld: np.ndarray[float, float]) -> list[int]:
+    # Create an array of the same length as ld and initialize it as None
+    value_alignments = [None] * (len(ld) - 1)
+
+    # Go through the entire array and find instances where words match
+    for i in range(1, len(ld)):
+        minimum = min(ld[i])
+        for j in range(len(ld[i])):
+            value = ld[i, j]
+
+            # Only process important values
+            if value == minimum:
+                # Get the surrounding check tiles
+                lowest_surrounding = min(ld[i - 1, j - 1], ld[i, j - 1], ld[i - 1, j])
+
+                # Check if all the conditions meet for a matching value
+                if value == ld[i - 1, j - 1] and value == lowest_surrounding:
+                    value_alignments[i - 1] = j - 1
+    
+    return value_alignments
 
 # Function to compare matching texts according to filenames
-def compare_matching_texts(transcript_data: List[Dict[str, str]], audio_mapping: Dict[str, str]) -> None:
-    for transcript_entry in transcript_data:
-        filename = transcript_entry['filename']
-        transcript_text = transcript_entry['text']
+def compare_texts(transcript_text: str, audio_text: str) -> None:
+    # Preprocess the text strings to normalized word arrays
+    transcript_words = preprocess_text(transcript_text)
+    audio_words = preprocess_text(audio_text)
 
-        # Check if the filename exists in the audio mapping
-        if filename in audio_mapping:
-            audio_text = audio_mapping[filename]
+    # Log the word arrays for debugging
+    print(f'Transcript Words: [range=0-{len(transcript_words) - 1}]')
+    print(f'{transcript_words}\n')
+    print(f'Audio Words: [range=0-{len(audio_words) - 1}]')
+    print(f'{audio_words}\n')
 
-            # Remove punctuation
-            transcript_words = preprocess_text(transcript_text)
-            audio_words = preprocess_text(audio_text)
 
-            # Handle the text from the instances of the same filename
-            print(f'{transcript_words}\n')
-            print(f'{audio_words}\n')
+    # Get the levenshtein distance
+    ld = levenshtein_distance(transcript_words, audio_words)
 
-            # Get the WER
-            wer_value = calculate_wer(transcript_words, audio_words)
-            print(f'The WER Value: {wer_value}')
-        else:
-            print(f"No matching entry in audio data for filename: {filename}\n")
+    # Allign the words in the levenshtein distance array
+    value_alignments = find_aligning_values(ld)
+
+    # Log the allignments for debugging
+    print(f'Mapping of word allignments from transcript to audio:')
+    print(f'{value_alignments}')
 
 def main() -> None:
     # Path to the transcript json file
@@ -94,8 +100,19 @@ def main() -> None:
     # Create a dictionary to store 'filename' -> 'text' mapping for the audio data
     audio_mapping = create_mapping(audio_data)
 
-    # Print matching texts
-    compare_matching_texts(transcript_data, audio_mapping)
+    # Loop through each of the transcript entries
+    for transcript_entry in transcript_data:
+        filename = transcript_entry['filename']
+        transcript_text = transcript_entry['text']
+
+        # Fetch an audio text with matching filenames
+        if filename in audio_mapping:
+            audio_text = audio_mapping[filename]
+
+            # compare the transcript and audio text
+            compare_texts(transcript_text, audio_text)
+        else:
+            print(f"No matching entry in audio data for filename: {filename}\n")
 
 if __name__ == "__main__":
     main()
