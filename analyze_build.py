@@ -6,7 +6,7 @@ def load_json(file_path: str) -> any:
         return json.load(file)
 
 # Function to create a mapping from json data
-def create_mapping(data: any):
+def create_mapping(data):
     return {item['filename']: item['text'] for item in data}
 
 # Function to compare matching texts according to filenames
@@ -37,7 +37,7 @@ def main():
     audio_data = load_json(audio_file_path)
 
     # Create a dictionary to store 'filename' -> 'text' mapping for the audio data
-    audio_mapping = create_audio_mapping(audio_data)
+    audio_mapping = create_mapping(audio_data)
 
     # Print matching texts
     compare_matching_texts(transcript_data, audio_mapping)
