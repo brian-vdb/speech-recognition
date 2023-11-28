@@ -13,16 +13,13 @@ def create_mapping(data: List[Dict[str, str]]) -> Dict[str, str]:
     return {item['filename']: item['text'] for item in data}
 
 # Removes punctuation and converts to lowercase
-def preprocess_text(text: str) -> str:
+def preprocess_text(text: str) -> list[str]:
     text_without_punctuation = text.translate(str.maketrans('', '', string.punctuation))
-    return text_without_punctuation.lower()
+    text_lowercase =  text_without_punctuation.lower()
+    return text_lowercase.split()
 
 # Calculates the word error rate by comparing two strings
-def calculate_wer(reference, hypothesis):
-    # Split the reference and hypothesis sentences into words
-    ref_words = reference.split()
-    hyp_words = hypothesis.split()
-
+def calculate_wer(ref_words, hyp_words):
     # Initialize a matrix with size |ref_words|+1 x |hyp_words|+1
     # The extra row and column are for the case when one of the strings is empty
     d = np.zeros((len(ref_words) + 1, len(hyp_words) + 1))
@@ -70,15 +67,15 @@ def compare_matching_texts(transcript_data: List[Dict[str, str]], audio_mapping:
             audio_text = audio_mapping[filename]
 
             # Remove punctuation
-            transcript_text = preprocess_text(transcript_text)
-            audio_text = preprocess_text(audio_text)
+            transcript_words = preprocess_text(transcript_text)
+            audio_words = preprocess_text(audio_text)
 
             # Handle the text from the instances of the same filename
-            print(f'{transcript_text}\n')
-            print(f'{audio_text}\n')
+            print(f'{transcript_words}\n')
+            print(f'{audio_words}\n')
 
             # Get the WER
-            wer_value = calculate_wer(transcript_text, audio_text)
+            wer_value = calculate_wer(transcript_words, audio_words)
             print(f'The WER Value: {wer_value}')
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
