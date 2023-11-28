@@ -1,16 +1,17 @@
 import json
+from typing import List, Dict, Any
 
 # Function to load in a json file
-def load_json(file_path: str) -> any:
+def load_json(file_path: str) -> Any:
     with open(file_path, 'r') as file:
         return json.load(file)
 
 # Function to create a mapping from json data
-def create_mapping(data):
+def create_mapping(data: List[Dict[str, str]]) -> Dict[str, str]:
     return {item['filename']: item['text'] for item in data}
 
 # Function to compare matching texts according to filenames
-def compare_matching_texts(transcript_data, audio_mapping):
+def compare_matching_texts(transcript_data: List[Dict[str, str]], audio_mapping: Dict[str, str]) -> None:
     for transcript_entry in transcript_data:
         filename = transcript_entry['filename']
         transcript_text = transcript_entry['text']
@@ -25,7 +26,7 @@ def compare_matching_texts(transcript_data, audio_mapping):
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 
-def main():
+def main() -> None:
     # Path to the transcript json file
     transcript_file_path = 'build/transcript_output.json'
 
