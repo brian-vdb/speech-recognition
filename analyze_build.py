@@ -77,6 +77,7 @@ def compare_matching_texts(transcript_data: List[Dict[str, str]], audio_mapping:
             print(f'{transcript_text}\n')
             print(f'{audio_text}\n')
 
+            # Get the WER
             wer_value = calculate_wer(transcript_text, audio_text)
             print(f'The WER Value: {wer_value}')
         else:
@@ -87,7 +88,7 @@ def main() -> None:
     transcript_file_path = 'build/transcript_output.json'
 
     # Path to the audio json file
-    audio_file_path = 'build/transcript_output.json'
+    audio_file_path = 'build/audio_output.json'
 
     # Load JSON data
     transcript_data = load_json(transcript_file_path)
