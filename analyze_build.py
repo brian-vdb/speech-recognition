@@ -1,12 +1,15 @@
 import json
 
-def load_json(file_path):
+# Function to load in a json file
+def load_json(file_path: str) -> any:
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def create_audio_mapping(audio_data):
-    return {item['filename']: item['text'] for item in audio_data}
+# Function to create a mapping from json data
+def create_mapping(data: any):
+    return {item['filename']: item['text'] for item in data}
 
+# Function to compare matching texts according to filenames
 def compare_matching_texts(transcript_data, audio_mapping):
     for transcript_entry in transcript_data:
         filename = transcript_entry['filename']
