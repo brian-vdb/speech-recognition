@@ -12,9 +12,10 @@ def load_json(file_path: str) -> Any:
 def create_mapping(data: List[Dict[str, str]]) -> Dict[str, str]:
     return {item['filename']: item['text'] for item in data}
 
-# Removes the interpunction
-def preprocess_text(text:str) -> str:
-    return text.translate(str.maketrans('', '', string.punctuation))
+# Removes punctuation and converts to lowercase
+def preprocess_text(text: str) -> str:
+    text_without_punctuation = text.translate(str.maketrans('', '', string.punctuation))
+    return text_without_punctuation.lower()
 
 # Calculates the word error rate by comparing two strings
 def calculate_wer(reference, hypothesis):
