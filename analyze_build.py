@@ -41,8 +41,8 @@ def levenshtein_distance(ref_words: list[str], hyp_words: list[str]) -> np.ndarr
 
     return ld
 
-# Function to find correct allignments using the levenshtein distance matrix
-def find_aligning_values(ld: np.ndarray[float, float]) -> list[int]:
+# Function to map value allignments using the levenshtein distance matrix
+def map_aligning_values(ld: np.ndarray[float, float]) -> list[int]:
     # Create an array of the same length as ld and initialize it as None
     value_alignments = [None] * (len(ld) - 1)
 
@@ -80,7 +80,7 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     ld = levenshtein_distance(transcript_words, audio_words)
 
     # Allign the words in the levenshtein distance array
-    value_alignments = find_aligning_values(ld)
+    value_alignments = map_aligning_values(ld)
 
     # Log the allignments for debugging
     print(f'Mapping of word allignments from transcript to audio:')
