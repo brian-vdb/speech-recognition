@@ -180,6 +180,7 @@ def calc_wer(S: int, D: int, I: int, N: int) -> float:
 def calc_wrr(C: int, I: int, N: int) -> float:
     return (C - I) / N
 
+# Function to calculate the Word Correct Rate
 def calc_wcr(C: int, N: int) -> float:
     return C / N
 
