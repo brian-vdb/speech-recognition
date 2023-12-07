@@ -22,7 +22,7 @@ def save_data_as_json(output_path: str, data: list[dict[str, str]]) -> None:
         output_file.write(json_data)
 
 # Function to convert the transcript file to JSON
-def convert_transcript_to_json(input_path: str, output_path: str) -> None:
+def convert_transcript_to_json(input_path: str, output_path: str, audio_filenames: list[str]) -> None:
     with open(input_path, 'r') as input_file:
         input_text = input_file.read()
 
@@ -39,16 +39,19 @@ def convert_transcript_to_json(input_path: str, output_path: str) -> None:
                 cleaned_string = ' '.join(stringBuilder.split())
 
                 # Split the cleaned string into filename and text
-                filename, text = cleaned_string.split(':', 1)
+                name, text = cleaned_string.split(':', 1)
 
                 # Remove trailing spaces from text
                 text = text.strip()
 
-                # Create a dictionary for the current dialogue
-                dialogue = {"filename": filename, "text": text}
+                # Add dialogue for every matching audio file
+                for audio_filename in audio_filenames:
+                    if name.lower() in audio_filename.lower():
+                        # Create a dictionary for the current dialogue
+                        dialogue = {"filename": audio_filename, "text": text}
 
-                # Add the dialogue dictionary to the data list
-                data.append(dialogue)
+                        # Add the dialogue dictionary to the data list
+                        data.append(dialogue)
 
                 # Reset the string builder
                 stringBuilder = ""
@@ -101,12 +104,6 @@ if __name__ == "__main__":
     # Ensure the 'build' directory exists
     build_dir = 'build'
     os.makedirs(build_dir, exist_ok=True)
-
-    # Clean the txt files
-    for txt_filename in txt_filenames:
-        input_path = os.path.join(input_folder, txt_filename)
-        output_path = os.path.join('build', 'transcript_output.json')
-        convert_transcript_to_json(input_path, output_path)
     
     # Filter for common media formats using FFmpeg
     media_formats = ['.m4a', '.mp1', '.mp2', '.mp3', '.wav', '.mp4', '.flac', '.rso', '.ape'] # Add more formats as needed
@@ -130,14 +127,12 @@ if __name__ == "__main__":
 
         # Calculate the elapsed time
         elapsed_time = end_time - start_time
-        print(f'Successfully: [Processed {audio_filename} in {elapsed_time} sec]')
-        print(job_id)
+        print(f'Success: [Processed {audio_filename} in {elapsed_time} sec]')
         
         # Get the dialogue dictionary
         print(f'Start: [Processing {audio_filename} Dialogue]')
         dialogue = process_job(audio_filename, job_id)
-        print(f'Successfully: [Processing {audio_filename} Dialogue]')
-        print(dialogue)
+        print(f'Success: [Processing {audio_filename} Dialogue]')
 
         # Append the dialogue to the data array
         data.append(dialogue)
@@ -145,3 +140,9 @@ if __name__ == "__main__":
     # Save the output in a .json file
     output_path = os.path.join('build', 'audio_output.json')
     save_data_as_json(output_path, data)
+
+    # Clean the txt files
+    for txt_filename in txt_filenames:
+        input_path = os.path.join(input_folder, txt_filename)
+        output_path = os.path.join('build', 'transcript_output.json')
+        convert_transcript_to_json(input_path, output_path, audio_filenames)
