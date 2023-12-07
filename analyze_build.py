@@ -201,6 +201,72 @@ def prepare_job_texts(transcript_text: str, audio_text: str) -> None:
     total_reference_words = len(transcript_words)
     return reference, recognized, total_reference_words
 
+# Function to calculate the vocab precision
+def calc_vocab_precision(reference, recognized):
+    true_positives = {}
+    selected_elements = {}
+
+    # Loop thtrough each of the recognized words
+    for i, word in enumerate(recognized):
+        if word == None:
+            continue
+
+        # Manage selected elements counter
+        found = word in selected_elements
+        if found:
+            selected_elements[word] += 1
+        else:
+            selected_elements[word] = 1
+            true_positives[word] = 0
+            found = True
+        
+        # Manage true positives counter
+        if reference[i] == word and found:
+            true_positives[word] += 1
+    
+    # Calculate the sums
+    true_positives_sum = 0
+    selected_elements_sum = 0
+    for key in selected_elements:
+        true_positives_sum += true_positives[key]
+        selected_elements_sum += selected_elements[key]
+    
+    # Return the calculated vocab precision
+    return true_positives_sum / selected_elements_sum
+
+def calc_vocab_recall(reference, recognized):
+    true_positives = {}
+    relevant_elements = {}
+
+    # Loop thtrough each of the referenced words
+    for i, word in enumerate(reference):
+        if word == None:
+            continue
+
+        # Manage relevant elements counter
+        found = word in relevant_elements
+        if found:
+            relevant_elements[word] += 1
+        else:
+            relevant_elements[word] = 1
+            true_positives[word] = 0
+            found = True
+        
+        # Manage true positives counter
+        if recognized[i] == word and found:
+            true_positives[word] += 1
+    
+    # Calculate the sums
+    true_positives_sum = 0
+    relevant_elements_sum = 0
+    for key in relevant_elements:
+        true_positives_sum += true_positives[key]
+        relevant_elements_sum += relevant_elements[key]
+
+    
+    # Return the calculated vocab recall
+    return true_positives_sum / relevant_elements_sum
+
 def main() -> None:
     # Path to the transcript json file
     transcript_file_path = 'build/transcript_output.json'
@@ -239,11 +305,19 @@ def main() -> None:
 
             # Get the WRR
             WRR = calc_wrr(C, I, N)
-            print(f'WRR {WRR}')
+            print(f'WRR: {WRR}')
 
             # Get the WCR
             WCR = calc_wcr(C, N)
-            print(f'WCR {WCR}')
+            print(f'WCR: {WCR}')
+
+            # Get the vocab precision
+            precision = calc_vocab_precision(reference, recognized)
+            print(f'Precision: {precision}')
+
+            # Get the vocab recall
+            recall = calc_vocab_recall(reference, recognized)
+            print(f'Recall: {recall}')
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 
