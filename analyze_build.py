@@ -185,7 +185,7 @@ def calc_wcr(C: int, N: int) -> float:
     return C / N
 
 # Function to compare matching texts according to filenames
-def compare_texts(transcript_text: str, audio_text: str) -> None:
+def prepare_job_texts(transcript_text: str, audio_text: str) -> None:
     # Preprocess the text strings to normalized word arrays
     transcript_words = preprocess_text(transcript_text)
     audio_words = preprocess_text(audio_text)
@@ -197,23 +197,9 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     value_alignments = map_aligning_values(ld)
 
     # Allign the two word arrays
-    aligned_transcript, aligned_audio = align_word_arrays(value_alignments, transcript_words, audio_words)
-
-    # Get all of the information needed to calculate errors for audio recognition
-    S, D, I, C = analyse_aligned_words(aligned_transcript, aligned_audio)
-    N = len(transcript_words)
-
-    # Get the WER
-    WER = calc_wer(S, D, I, N)
-    print(f'WER: {WER}')
-
-    # Get the WRR
-    WRR = calc_wrr(C, I, N)
-    print(f'WRR {WRR}')
-
-    # Get the WCR
-    WCR = calc_wcr(C, N)
-    print(f'WCR {WCR}')
+    reference, recognized = align_word_arrays(value_alignments, transcript_words, audio_words)
+    total_reference_words = len(transcript_words)
+    return reference, recognized, total_reference_words
 
 def main() -> None:
     # Path to the transcript json file
@@ -239,7 +225,25 @@ def main() -> None:
             audio_text = audio_mapping[filename]
 
             # compare the transcript and audio text
-            compare_texts(transcript_text, audio_text)
+            reference, recognized, N = prepare_job_texts(transcript_text, audio_text)
+
+            # Print the amount of words
+            print(f'N: {N}')
+
+            # Get all of the information needed to calculate errors for audio recognition
+            S, D, I, C = analyse_aligned_words(reference, recognized)
+
+            # Get the WER
+            WER = calc_wer(S, D, I, N)
+            print(f'WER: {WER}')
+
+            # Get the WRR
+            WRR = calc_wrr(C, I, N)
+            print(f'WRR {WRR}')
+
+            # Get the WCR
+            WCR = calc_wcr(C, N)
+            print(f'WCR {WCR}')
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 
