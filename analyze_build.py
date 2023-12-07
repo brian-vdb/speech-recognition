@@ -63,18 +63,126 @@ def map_aligning_values(ld: np.ndarray[float, float]) -> list[int]:
     
     return value_alignments
 
+# Function to append none for missing values
+def add_none_for_missing(result_array: list[str], target_size: int) -> list[str]:
+    # Append None values for insertions
+    while len(result_array) < target_size:
+        result_array.append(None)
+    return result_array
+
+# Function to align two word arrays with an alignment array based on the levenshtein distance
+def align_word_arrays(value_alignments: list[int], transcript_words: list[str], audio_words: list[str]) -> tuple[list[str], list[str]]:
+    # Arrays Indices
+    transcript_index = 0
+    audio_index = 0
+    result_index = 0
+
+    # Result Arrays
+    aligned_transcript = []
+    aligned_audio = []
+
+    # Loop through the correct allignments
+    for i, allignment in enumerate(value_alignments):
+        # Skips to the next iteration
+        if allignment == None:
+            continue
+        
+        # Find errors in the transcript array
+        transcript_errors = 0
+        while transcript_index < i:
+            # Keep track of errors for result allignment
+            transcript_errors += 1
+
+            # Append the error incrementing the result index
+            aligned_transcript.append(transcript_words[transcript_index])
+            transcript_index += 1
+            result_index += 1
+
+        # Find errors in the audio array
+        while audio_index < allignment:
+            # Append the error
+            aligned_audio.append(audio_words[audio_index])
+            audio_index += 1
+
+            # Only start increasing the result index after matching the transcript errors
+            if transcript_errors > 0:
+                transcript_errors -= 1
+            else:
+                result_index += 1
+
+        # Append None values for missing values
+        aligned_transcript = add_none_for_missing(aligned_transcript, result_index)
+        aligned_audio = add_none_for_missing(aligned_audio, result_index)
+
+        # Append the correctly alligned words
+        aligned_transcript.append(transcript_words[transcript_index])
+        aligned_audio.append(audio_words[audio_index])
+
+        # increment the indices for each correct allignment
+        transcript_index += 1
+        audio_index += 1
+        result_index += 1
+    
+    # Find trailing errors for the transcript words
+    transcript_errors = 0
+    while transcript_index < len(transcript_words):
+        # Keep track of errors for result allignment
+        transcript_errors += 1
+
+        # Append the error incrementing the result index
+        aligned_transcript.append(transcript_words[transcript_index])
+        transcript_index += 1
+        result_index += 1
+
+    # Find trailing errors for the audio words
+    while audio_index < len(audio_words):
+        # Append the error
+        aligned_audio.append(audio_words[audio_index])
+        audio_index += 1
+
+        # Only start increasing the result index after matching the transcript errors
+        if transcript_errors > 0:
+            transcript_errors -= 1
+        else:
+            result_index += 1
+    
+    # Append None values for missing values
+    aligned_transcript = add_none_for_missing(aligned_transcript, result_index)
+    aligned_audio = add_none_for_missing(aligned_audio, result_index)
+
+    return aligned_transcript, aligned_audio
+
+# Function to analyze aligned text
+def analyze_aligned_texts(reference: list[str], recognized: list[str]) -> tuple[int, int, int, int]:
+    substitutions = 0
+    deletions = 0
+    insertions = 0
+    corrects = 0
+
+    # Loop through the aligned arrays to detect cases
+    for i, value in enumerate(reference):
+        if value == None:
+            insertions += 1
+        elif recognized[i] == None:
+            deletions += 1
+        elif value == recognized[i]:
+            corrects += 1
+        else:
+            substitutions += 1
+
+    return substitutions, deletions, insertions, corrects
+
+def calc_wer():
+    """"""
+
+def calc_wrr():
+    """"""
+
 # Function to compare matching texts according to filenames
 def compare_texts(transcript_text: str, audio_text: str) -> None:
     # Preprocess the text strings to normalized word arrays
     transcript_words = preprocess_text(transcript_text)
     audio_words = preprocess_text(audio_text)
-
-    # Log the word arrays for debugging
-    print(f'Transcript Words: [range=0-{len(transcript_words) - 1}]')
-    print(f'{transcript_words}\n')
-    print(f'Audio Words: [range=0-{len(audio_words) - 1}]')
-    print(f'{audio_words}\n')
-
 
     # Get the levenshtein distance
     ld = levenshtein_distance(transcript_words, audio_words)
@@ -82,9 +190,15 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     # Allign the words in the levenshtein distance array
     value_alignments = map_aligning_values(ld)
 
-    # Log the allignments for debugging
-    print(f'Mapping of word allignments from transcript to audio:')
-    print(f'{value_alignments}')
+    # Allign the two word arrays
+    aligned_transcript, aligned_audio = align_word_arrays(value_alignments, transcript_words, audio_words)
+
+    # Get all of the information needed to calculate errors for audio recognition
+    S, D, I, C = analyze_aligned_texts(aligned_transcript, aligned_audio)
+
+    print(calc_wer)
+    
+    print(calc_wrr)
 
 def main() -> None:
     # Path to the transcript json file
