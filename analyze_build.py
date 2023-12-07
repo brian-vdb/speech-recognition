@@ -177,8 +177,11 @@ def calc_wer(S: int, D: int, I: int, N: int) -> float:
     return (S + D + I) / N
 
 # Function to calculate the Word Recognition Rate
-def calc_wrr(C: int, I: int, N: int) -> float:
-    return (C - I) / N
+def calc_wrr(S: int, D: int, I: int, N: int) -> float:
+    return ((N - (S + D)) - I) / N
+
+def calc_wcr(C: int, N: int) -> float:
+    return C / N
 
 # Function to compare matching texts according to filenames
 def compare_texts(transcript_text: str, audio_text: str) -> None:
@@ -199,9 +202,17 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     S, D, I, C = analyze_aligned_texts(aligned_transcript, aligned_audio)
     N = len(aligned_transcript)
 
-    print(calc_wer(S, D, I, N))
-    
-    print(calc_wrr(C, I, N))
+    # Get the WER
+    WER = calc_wer(S, D, I, N)
+    print(f'WER: {WER}')
+
+    # Get the WRR
+    WRR = calc_wrr(S, D, I, N)
+    print(f'WRR {WRR}')
+
+    # Get the WCR
+    WCR = calc_wcr(C, N)
+    print(f'WCR {WCR}')
 
 def main() -> None:
     # Path to the transcript json file
