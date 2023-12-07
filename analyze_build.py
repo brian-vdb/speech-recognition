@@ -201,71 +201,60 @@ def prepare_job_texts(transcript_text: str, audio_text: str) -> None:
     total_reference_words = len(transcript_words)
     return reference, recognized, total_reference_words
 
-# Function to calculate the vocab precision
-def calc_vocab_precision(reference, recognized):
-    true_positives = {}
+# Function to get the selected elements
+def get_selected_elements(recognized: list[str]) -> dict[str, int]:
     selected_elements = {}
 
     # Loop thtrough each of the recognized words
-    for i, word in enumerate(recognized):
+    for word in recognized:
         if word == None:
             continue
 
         # Manage selected elements counter
-        found = word in selected_elements
-        if found:
+        if word in selected_elements:
             selected_elements[word] += 1
         else:
             selected_elements[word] = 1
-            true_positives[word] = 0
-            found = True
-        
-        # Manage true positives counter
-        if reference[i] == word and found:
-            true_positives[word] += 1
-    
-    # Calculate the sums
-    true_positives_sum = 0
-    selected_elements_sum = 0
-    for key in selected_elements:
-        true_positives_sum += true_positives[key]
-        selected_elements_sum += selected_elements[key]
-    
-    # Return the calculated vocab precision
-    return true_positives_sum / selected_elements_sum
 
-def calc_vocab_recall(reference, recognized):
-    true_positives = {}
+    return selected_elements
+
+# Function to get the relevant elements
+def get_relevant_elements(reference: list[str]) -> dict[str, int]:
     relevant_elements = {}
 
     # Loop thtrough each of the referenced words
-    for i, word in enumerate(reference):
+    for word in reference:
         if word == None:
             continue
 
         # Manage relevant elements counter
-        found = word in relevant_elements
-        if found:
+        if word in relevant_elements:
             relevant_elements[word] += 1
         else:
             relevant_elements[word] = 1
-            true_positives[word] = 0
-            found = True
-        
-        # Manage true positives counter
-        if recognized[i] == word and found:
-            true_positives[word] += 1
-    
-    # Calculate the sums
-    true_positives_sum = 0
-    relevant_elements_sum = 0
-    for key in relevant_elements:
-        true_positives_sum += true_positives[key]
-        relevant_elements_sum += relevant_elements[key]
 
+    return relevant_elements
+
+# Function to get the true positives
+def get_true_positives(reference: list[str], recognized: list[str]) -> dict[str, int]:
+    true_positives = {}
+
+    # Loop thtrough each of the referenced words
+    for i, word in enumerate(reference):
+        match = word == recognized[i]
+        if match and word in true_positives:
+            true_positives[word] += 1
+        elif match:
+            true_positives[word] = 1
     
-    # Return the calculated vocab recall
-    return true_positives_sum / relevant_elements_sum
+    return true_positives
+
+# Function to sum dictiory values
+def get_dictionary_sum(dictionary: dict[str, int]) -> int:
+    sum = 0
+    for key in dictionary:
+        sum += dictionary[key]
+    return sum
 
 def main() -> None:
     # Path to the transcript json file
@@ -311,13 +300,16 @@ def main() -> None:
             WCR = calc_wcr(C, N)
             print(f'WCR: {WCR}')
 
-            # Get the vocab precision
-            precision = calc_vocab_precision(reference, recognized)
-            print(f'Precision: {precision}')
+            # Get the selected and relevant elements and the true positives
+            selected_elements = get_selected_elements(recognized)
+            relevant_elements = get_relevant_elements(reference)
+            true_positives = get_true_positives(reference, recognized)
 
-            # Get the vocab recall
-            recall = calc_vocab_recall(reference, recognized)
-            print(f'Recall: {recall}')
+            # Calculate the micro precision and recall
+            true_positives_sum = get_dictionary_sum(true_positives)
+            micro_precision = true_positives_sum / get_dictionary_sum(selected_elements)
+            micro_recall = true_positives_sum / get_dictionary_sum(relevant_elements)
+            print(f'Micro Precision: {micro_precision}, Micro Recall: {micro_recall}')
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 
