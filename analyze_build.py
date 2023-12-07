@@ -264,6 +264,20 @@ def calc_macro_score(true_positives: dict[str, int], elements: dict[str, int]) -
     total_elements = len(elements)
     return (1 / total_elements) * elements_sum
 
+# Function to load and save the results
+def load_and_save_results(filename: str, data: dict[str, float]):
+    results = load_json('build/results.json')
+    
+    # Update the entry
+    for entry in results:
+        if entry['filename'] == filename:
+            entry.update(data)
+            break
+    
+    # Save the change
+    with open('build/results.json', 'w') as file:
+        json.dump(results, file, indent=2)
+
 def main() -> None:
     # Path to the transcript json file
     transcript_file_path = 'build/transcript_output.json'
@@ -321,13 +335,32 @@ def main() -> None:
             micro_recall = true_positives_sum / get_dictionary_sum(relevant_elements)
             print(f'- Micro Precision: {round(micro_precision, 4)}, Micro Recall: {round(micro_recall, 4)}')
 
+            # Calculate the macro precision and recall
             macro_precision = calc_macro_score(true_positives, selected_elements)
             macro_recall = calc_macro_score(true_positives, relevant_elements)
             print(f'- Macro Precision: {round(macro_precision, 4)}, Macro Recall: {round(macro_recall, 4)}')
 
+            # Calculate the F-Scores
             micro_f_score = (2 * micro_precision * micro_recall) / (micro_precision + micro_recall)
             macro_f_score = (2 * macro_precision * macro_recall) / (macro_precision + macro_recall)
             print(f'- Micro f-score: {round(micro_f_score, 4)}, Macro f-score: {round(macro_f_score, 4)}')
+
+            # Save the data to the results json
+            load_and_save_results(filename, {
+                "substitutions": S,
+                "deletions": D,
+                "insertions": I,
+                "corrects": C,
+                "WER": WER,
+                "WRR": WRR,
+                "WCR": WCR,
+                "Micro Precision": micro_precision,
+                "Micro Recall": micro_recall,
+                "Micro F-Score": micro_f_score,
+                "Macro Precision": macro_precision,
+                "Macro Recall": macro_recall,
+                "Macro F-Score": macro_f_score
+            })
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 

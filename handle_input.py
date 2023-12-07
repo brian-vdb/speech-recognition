@@ -137,7 +137,7 @@ def main() -> None:
 
         # Append the dialogue to the data array
         data.append(dialogue)
-        rtf_scores.append({"filename": audio_filename, "RTF": elapsed_time})
+        rtf_scores.append({"filename": audio_filename, "RTF (Seconds)": elapsed_time})
     
     # Save the output in a .json file
     output_path = os.path.join('build', 'audio_output.json')
