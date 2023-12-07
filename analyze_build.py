@@ -175,8 +175,8 @@ def analyze_aligned_texts(reference: list[str], recognized: list[str]) -> tuple[
 def calc_wer():
     """"""
 
-def calc_wrr():
-    """"""
+def calc_wrr(C: int, I: int, N: int) -> float:
+    return (C - I) / N
 
 # Function to compare matching texts according to filenames
 def compare_texts(transcript_text: str, audio_text: str) -> None:
@@ -199,7 +199,7 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
 
     print(calc_wer)
     
-    print(calc_wrr)
+    print(calc_wrr(C, I, N))
 
 def main() -> None:
     # Path to the transcript json file
