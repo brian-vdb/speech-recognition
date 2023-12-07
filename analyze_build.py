@@ -153,7 +153,7 @@ def align_word_arrays(value_alignments: list[int], transcript_words: list[str], 
     return aligned_transcript, aligned_audio
 
 # Function to analyze aligned text
-def analyze_aligned_texts(reference: list[str], recognized: list[str]) -> tuple[int, int, int, int]:
+def analyse_aligned_words(reference: list[str], recognized: list[str]) -> tuple[int, int, int, int]:
     substitutions = 0
     deletions = 0
     insertions = 0
@@ -199,7 +199,7 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     aligned_transcript, aligned_audio = align_word_arrays(value_alignments, transcript_words, audio_words)
 
     # Get all of the information needed to calculate errors for audio recognition
-    S, D, I, C = analyze_aligned_texts(aligned_transcript, aligned_audio)
+    S, D, I, C = analyse_aligned_words(aligned_transcript, aligned_audio)
     N = len(aligned_transcript)
 
     # Get the WER
