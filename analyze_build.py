@@ -256,6 +256,14 @@ def get_dictionary_sum(dictionary: dict[str, int]) -> int:
         sum += dictionary[key]
     return sum
 
+# Function to calculate the macro score
+def calc_macro_score(true_positives: dict[str, int], elements: dict[str, int]) -> float:
+    elements_sum = 0
+    for key in true_positives:
+        elements_sum += true_positives[key] / elements[key]
+    total_elements = len(elements)
+    return (1 / total_elements) * elements_sum
+
 def main() -> None:
     # Path to the transcript json file
     transcript_file_path = 'build/transcript_output.json'
@@ -282,23 +290,25 @@ def main() -> None:
             # compare the transcript and audio text
             reference, recognized, N = prepare_job_texts(transcript_text, audio_text)
 
+            print(f'\n{filename}:')
+
             # Print the amount of words
-            print(f'N: {N}')
+            print(f'- N: {N}')
 
             # Get all of the information needed to calculate errors for audio recognition
             S, D, I, C = analyse_aligned_words(reference, recognized)
 
             # Get the WER
             WER = calc_wer(S, D, I, N)
-            print(f'WER: {WER}')
+            print(f'- WER: {round(WER, 4)}')
 
             # Get the WRR
             WRR = calc_wrr(C, I, N)
-            print(f'WRR: {WRR}')
+            print(f'- WRR: {round(WRR, 4)}')
 
             # Get the WCR
             WCR = calc_wcr(C, N)
-            print(f'WCR: {WCR}')
+            print(f'- WCR: {round(WCR, 4)}')
 
             # Get the selected and relevant elements and the true positives
             selected_elements = get_selected_elements(recognized)
@@ -309,9 +319,18 @@ def main() -> None:
             true_positives_sum = get_dictionary_sum(true_positives)
             micro_precision = true_positives_sum / get_dictionary_sum(selected_elements)
             micro_recall = true_positives_sum / get_dictionary_sum(relevant_elements)
-            print(f'Micro Precision: {micro_precision}, Micro Recall: {micro_recall}')
+            print(f'- Micro Precision: {round(micro_precision, 4)}, Micro Recall: {round(micro_recall, 4)}')
+
+            macro_precision = calc_macro_score(true_positives, selected_elements)
+            macro_recall = calc_macro_score(true_positives, relevant_elements)
+            print(f'- Macro Precision: {round(macro_precision, 4)}, Macro Recall: {round(macro_recall, 4)}')
+
+            micro_f_score = (2 * micro_precision * micro_recall) / (micro_precision + micro_recall)
+            macro_f_score = (2 * macro_precision * macro_recall) / (macro_precision + macro_recall)
+            print(f'- Micro f-score: {round(micro_f_score, 4)}, Macro f-score: {round(macro_f_score, 4)}')
         else:
             print(f"No matching entry in audio data for filename: {filename}\n")
 
 if __name__ == "__main__":
     main()
+    print()
