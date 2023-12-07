@@ -93,7 +93,7 @@ def convert_transcript_to_json(input_path: str, output_path: str, audio_filename
     # Save the output in a .json file
     save_data_as_json(output_path, data)
 
-if __name__ == "__main__":
+def main() -> None:
     # Define the input folder from args when available
     input_folder = sys.argv[1] if len(sys.argv) >= 2 else 'input'
     filenames = os.listdir(input_folder)
@@ -146,3 +146,6 @@ if __name__ == "__main__":
         input_path = os.path.join(input_folder, txt_filename)
         output_path = os.path.join('build', 'transcript_output.json')
         convert_transcript_to_json(input_path, output_path, audio_filenames)
+
+if __name__ == "__main__":
+    main()
