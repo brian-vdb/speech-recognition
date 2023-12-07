@@ -172,8 +172,8 @@ def analyze_aligned_texts(reference: list[str], recognized: list[str]) -> tuple[
 
     return substitutions, deletions, insertions, corrects
 
-def calc_wer():
-    """"""
+def calc_wer(S, D, I , N):
+    return (S + D + I) / N
 
 # Function to calculate the Word Recognition Rate
 def calc_wrr(C: int, I: int, N: int) -> float:
@@ -198,7 +198,7 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
     S, D, I, C = analyze_aligned_texts(aligned_transcript, aligned_audio)
     N = len(aligned_transcript)
 
-    print(calc_wer)
+    print(calc_wer(S,D,I,N))
     
     print(calc_wrr(C, I, N))
 
