@@ -195,6 +195,7 @@ def compare_texts(transcript_text: str, audio_text: str) -> None:
 
     # Get all of the information needed to calculate errors for audio recognition
     S, D, I, C = analyze_aligned_texts(aligned_transcript, aligned_audio)
+    N = len(aligned_transcript)
 
     print(calc_wer)
     
