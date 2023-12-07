@@ -175,6 +175,7 @@ def analyze_aligned_texts(reference: list[str], recognized: list[str]) -> tuple[
 def calc_wer():
     """"""
 
+# Function to calculate the Word Recognition Rate
 def calc_wrr(C: int, I: int, N: int) -> float:
     return (C - I) / N
 
