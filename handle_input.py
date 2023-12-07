@@ -12,6 +12,36 @@ api_key = os.environ.get("API_KEY")
 # create your client
 client = apiclient.RevAiAPIClient(api_key)
 
+# Function to process an audio file and get the job id
+def process_audio_file(path: str) -> any:
+    # send a local file
+    job = client.submit_job_local_file(path)
+
+    # check job status
+    while(True):
+        if(client.get_job_details(job.id).status != JobStatus.IN_PROGRESS):
+            break
+
+    # return the job id
+    return job.id
+
+# Function to extract and concatenate values labeled as 'text' and 'punct'
+def get_text_from_json(json_data: any) -> str:
+    result_string = ""
+    for monologue in json_data['monologues']:
+        for element in monologue['elements']:
+            if element['type'] in ('text', 'punct'):
+                result_string += element['value']
+    return result_string
+
+# Function to process a job by retrieving transcript JSON using the client and extracting relevant information.
+def process_job(filename: str, job_id: any) -> dict[str, str]:
+    # Retrieve transcript JSON for the given job_id using the client
+    json = client.get_transcript_json(job_id)
+    
+    # Return a dictionary containing information for the current job, including the filename and extracted text
+    return {"filename": filename, "text": get_text_from_json(json)}
+
 # Function to save data in a json file
 def save_data_as_json(output_path: str, data: list[dict[str, str]]) -> None:
     # Convert the data list to a JSON string
@@ -62,36 +92,6 @@ def convert_transcript_to_json(input_path: str, output_path: str, audio_filename
 
     # Save the output in a .json file
     save_data_as_json(output_path, data)
-
-# Function to process an audio file and get the job id
-def process_audio_file(path: str) -> any:
-    # send a local file
-    job = client.submit_job_local_file(path)
-
-    # check job status
-    while(True):
-        if(client.get_job_details(job.id).status != JobStatus.IN_PROGRESS):
-            break
-
-    # return the job id
-    return job.id
-
-# Function to extract and concatenate values labeled as 'text' and 'punct'
-def get_text_from_json(json_data: any) -> str:
-    result_string = ""
-    for monologue in json_data['monologues']:
-        for element in monologue['elements']:
-            if element['type'] in ('text', 'punct'):
-                result_string += element['value']
-    return result_string
-
-# Function to process a job by retrieving transcript JSON using the client and extracting relevant information.
-def process_job(filename: str, job_id: any) -> dict[str, str]:
-    # Retrieve transcript JSON for the given job_id using the client
-    json = client.get_transcript_json(job_id)
-    
-    # Return a dictionary containing information for the current job, including the filename and extracted text
-    return {"filename": filename, "text": get_text_from_json(json)}
 
 if __name__ == "__main__":
     # Define the input folder from args when available
