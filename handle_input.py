@@ -111,6 +111,7 @@ def main() -> None:
 
     # Handle all of the input files
     data = []
+    rtf_scores = []
     for audio_filename in audio_filenames:
         # Use os.path.join to create the full path for each file
         path = os.path.join(input_folder, audio_filename)
@@ -136,10 +137,15 @@ def main() -> None:
 
         # Append the dialogue to the data array
         data.append(dialogue)
+        rtf_scores.append({"filename": audio_filename, "RTF": elapsed_time})
     
     # Save the output in a .json file
     output_path = os.path.join('build', 'audio_output.json')
     save_data_as_json(output_path, data)
+
+    # Save the output in a .json file
+    output_path = os.path.join('build', 'results.json')
+    save_data_as_json(output_path, rtf_scores)
 
     # Clean the txt files
     for txt_filename in txt_filenames:
