@@ -347,10 +347,10 @@ def main() -> None:
 
             # Save the data to the results json
             load_and_save_results(filename, {
-                "substitutions": S,
-                "deletions": D,
-                "insertions": I,
-                "corrects": C,
+                "Substitutions": S,
+                "Deletions": D,
+                "Insertions": I,
+                "Corrects": C,
                 "WER": WER,
                 "WRR": WRR,
                 "WCR": WCR,
