@@ -1,6 +1,6 @@
 # speech-recognition
 
-Assignment for Bernardo
+Assignment for B. R. Villalba Frias
 
 - Make sure that the names in the transcript file are identical to the files it should match to. For example: test1_ would match with every file where test1_ is in the filename.
 - Either create a folder called 'input' and upload the audio files and transcript file in there, or call the handle_input.py script with the folder name of the input folder.
