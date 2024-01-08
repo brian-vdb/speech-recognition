@@ -278,6 +278,29 @@ def load_and_save_results(filename: str, data: dict[str, float]):
     with open('build/results.json', 'w') as file:
         json.dump(results, file, indent=2)
 
+# Function to calculate the precision of a specific word
+def get_precision(reference, recognized, target):
+    TP = 0
+    SE = 0
+    for i, word in enumerate(recognized):
+        if word == target:
+            SE += 1
+            if word == reference[i]:
+                TP += 1
+    return TP / SE
+
+# Function to calculate the recall of a specific word
+def get_recall(reference, recognized, target):
+    """"""
+    TP = 0
+    RE = 0
+    for i, word in enumerate(reference):
+        if word == target:
+            RE += 1
+            if word == recognized[i]:
+                TP += 1
+    return TP / RE
+
 def main() -> None:
     # Path to the transcript json file
     transcript_file_path = 'build/transcript_output.json'
@@ -303,7 +326,7 @@ def main() -> None:
 
             # compare the transcript and audio text
             reference, recognized, N = prepare_job_texts(transcript_text, audio_text)
-
+            
             print(f'\n{filename}:')
 
             # Print the amount of words
@@ -329,10 +352,22 @@ def main() -> None:
             relevant_elements = get_relevant_elements(reference)
             true_positives = get_true_positives(reference, recognized)
 
-            # Calculate the micro precision and recall
+            # Sum of True Positives
             true_positives_sum = get_dictionary_sum(true_positives)
-            micro_precision = true_positives_sum / get_dictionary_sum(selected_elements)
-            micro_recall = true_positives_sum / get_dictionary_sum(relevant_elements)
+
+            # Micro Precision
+            recognized_len = len(recognized)
+            for word in recognized:
+                if word == None:
+                    recognized_len -= 1
+            micro_precision = true_positives_sum / recognized_len
+
+            # Micro Recall
+            reference_len = len(reference)
+            for word in reference:
+                if word == None:
+                    reference_len -= 1
+            micro_recall = true_positives_sum / reference_len
             print(f'- Micro Precision: {round(micro_precision, 4)}, Micro Recall: {round(micro_recall, 4)}')
 
             # Calculate the macro precision and recall
